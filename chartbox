@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Faculty Dashboard - AcharyaConnect</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f5f7fa;
+      color: #333;
+      padding: 20px;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .app-container {
+      display: flex;
+      max-width: 1400px;
+      margin: 0 auto;
+      gap: 20px;
+    }
+
+    .dashboard-container {
+      flex: 1;
+      background: #ffffff;
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s;
+    }
+
+    .chat-sidebar {
+      width: 0;
+      overflow: hidden;
+      transition: width 0.3s ease;
+      position: relative;
+    }
+
+    .chat-sidebar.active {
+      width: 400px;
+    }
+
+    .chat-container {
+      background: #ffffff;
+      border-radius: 15px;
+      height: 100%;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .chat-sidebar.active .chat-container {
+      opacity: 1;
+    }
+
+    /* Dark Mode Styles */
+    .dark-mode {
+      background-color: #121212;
+      color: #e0e0e0;
+    }
+
+    .dark-mode .dashboard-container,
+    .dark-mode .chat-container {
+      background: #1e1e1e;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Profile Section */
+    .profile-section {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    .profile-section img {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #4a6bff;
+    }
+
+    .profile-info h2 {
+      font-size: 1.4rem;
+      margin-bottom: 5px;
+    }
+
+    .profile-info p {
+      color: #666;
+      font-size: 0.9rem;
+      margin-bottom: 5px;
+    }
+
+    .role-tag {
+      background-color: #4a6bff;
+      color: white;
+      padding: 3px 12px;
+      border-radius: 15px;
+      font-size: 0.8rem;
+      display: inline-block;
+    }
+
+    /* Tasks Section */
+    .tasks-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .tasks-header h2 {
+      color: #2c3e50;
+      font-size: 1.5rem;
+    }
+
+    .task-list {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .task-card {
+      background: #ffffff;
+      border-left: 5px solid #ff9f43;
+      padding: 18px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      transition: transform 0.2s;
+    }
+
+    .task-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .task-card.completed {
+      border-left-color: #4a6bff;
+      background-color: #f8faff;
+    }
+
+    .task-title {
+      font-size: 1.1rem;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .task-meta {
+      display: flex;
+      gap: 15px;
+      font-size: 0.85rem;
+      color: #666;
+      margin-bottom: 15px;
+    }
+
+    .task-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background-color: #4a6bff;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: #3a5bef;
+    }
+
+    .btn-secondary {
+      background-color: #ff9f43;
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background-color: #ff8f33;
+    }
+
+    .btn-ghost {
+      background-color: transparent;
+      border: 1px solid #ddd;
+      color: #666;
+    }
+
+    .btn-ghost:hover {
+      background-color: #f5f5f5;
+    }
+
+    .status-badge {
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .status-pending {
+      background-color: #fff3e0;
+      color: #ff6d00;
+    }
+
+    .status-completed {
+      background-color: #e3f2fd;
+      color: #1565c0;
+    }
+
+    /* Chat Styles */
+    .chat-header {
+      padding: 15px 20px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .chat-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+
+    .close-chat {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #666;
+      transition: color 0.2s;
+    }
+
+    .close-chat:hover {
+      color: #333;
+    }
+
+    .chat-messages {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .message {
+      max-width: 80%;
+      padding: 10px 15px;
+      border-radius: 18px;
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+
+    .message-you {
+      align-self: flex-end;
+      background-color: #4a6bff;
+      color: white;
+      border-bottom-right-radius: 5px;
+    }
+
+    .message-other {
+      align-self: flex-start;
+      background-color: #f0f0f0;
+      color: #333;
+      border-bottom-left-radius: 5px;
+    }
+
+    .message-sender {
+      font-weight: 600;
+      margin-bottom: 5px;
+      font-size: 0.8rem;
+    }
+
+    .message-time {
+      font-size: 0.7rem;
+      opacity: 0.7;
+      margin-top: 5px;
+      text-align: right;
+    }
+
+    .chat-input-area {
+      padding: 15px 20px;
+      border-top: 1px solid #eee;
+      display: flex;
+      gap: 10px;
+    }
+
+    .chat-input {
+      flex: 1;
+      padding: 10px 15px;
+      border-radius: 20px;
+      border: 1px solid #ddd;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .chat-input:focus {
+      border-color: #4a6bff;
+    }
+
+    .send-btn {
+      background-color: #4a6bff;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .send-btn:hover {
+      background-color: #3a5bef;
+    }
+
+    /* Dark Mode Adjustments */
+    .dark-mode .profile-info p {
+      color: #aaa;
+    }
+
+    .dark-mode .tasks-header h2 {
+      color: #e0e0e0;
+    }
+
+    .dark-mode .task-card {
+      background: #2a2a2a;
+    }
+
+    .dark-mode .task-card.completed {
+      background-color: #1a2a4a;
+    }
+
+    .dark-mode .btn-ghost {
+      border-color: #444;
+      color: #aaa;
+    }
+
+    .dark-mode .btn-ghost:hover {
+      background-color: #333;
+    }
+
+    .dark-mode .status-pending {
+      background-color: #332200;
+      color: #ffaa44;
+    }
+
+    .dark-mode .status-completed {
+      background-color: #112233;
+      color: #66aaff;
+    }
+
+    .dark-mode .chat-header,
+    .dark-mode .chat-input-area {
+      border-color: #444;
+    }
+
+    .dark-mode .chat-title {
+      color: #e0e0e0;
+    }
+
+    .dark-mode .close-chat {
+      color: #aaa;
+    }
+
+    .dark-mode .close-chat:hover {
+      color: #fff;
+    }
+
+    .dark-mode .message-other {
+      background-color: #333;
+      color: #e0e0e0;
+    }
+
+    .dark-mode .chat-input {
+      background-color: #333;
+      border-color: #444;
+      color: #e0e0e0;
+    }
+
+    /* Collaborators styles */
+    .collaborators-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 10px 0;
+    }
+
+    .collaborators-label {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: #00008b;
+      display: flex;
+      align-items: center;
+    }
+
+    .dash {
+      margin-left: 5px;
+      color: #ffa500;
+    }
+
+    .dark-mode .collaborators-label {
+      color: #90caf9;
+    }
+
+    .dark-mode .dash {
+      color: #ffb74d;
+    }
+
+    .collaborators {
+      display: flex;
+      justify-content: center;
+    }
+
+    .collaborator-img {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid white;
+      margin-left: -12px;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .collaborator-img:first-child {
+      margin-left: 0;
+    }
+
+    .collaborator-img:hover {
+      transform: scale(1.2);
+      z-index: 10;
+    }
+
+    .collaborators-count {
+      background-color: #0000cd;
+      color: white;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      margin-left: -12px;
+      border: 2px solid white;
+      position: relative;
+    }
+
+    .dark-mode .collaborators-count {
+      background-color: #3f51b5;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); }
+      to { transform: translateX(0); }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .app-container {
+        flex-direction: column;
+      }
+      
+      .chat-sidebar {
+        width: 100%;
+        height: 0;
+        transition: height 0.3s ease;
+      }
+      
+      .chat-sidebar.active {
+        width: 100%;
+        height: 400px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <div class="dashboard-container">
+      <div class="profile-section">
+        <img src="faculty.jpg" alt="Faculty Photo">
+        <div class="profile-info">
+          <h2>Prof. Meera Sharma</h2>
+          <p>AUID: AITF0012 | Computer Science Department</p>
+          <span class="role-tag">Senior Lecturer</span>
+        </div>
+      </div>
+
+      <div class="tasks-header">
+        <h2>Your Tasks</h2>
+        <button class="btn btn-ghost" onclick="toggleDarkMode()">Toggle Dark Mode</button>
+      </div>
+
+      <div class="task-list" id="taskList">
+        <!-- Tasks will be loaded here -->
+      </div>
+    </div>
+
+    <div class="chat-sidebar" id="chatSidebar">
+      <div class="chat-container">
+        <div class="chat-header">
+          <div class="chat-title" id="chatTitle">Task Discussion</div>
+          <button class="close-chat" onclick="closeChat()">×</button>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+          <!-- Messages will appear here -->
+        </div>
+        <div class="chat-input-area">
+          <input type="text" class="chat-input" id="chatInput" placeholder="Type your message...">
+          <button class="send-btn" onclick="sendMessage()">→</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Sample data
+    const facultyTasks = [
+      { 
+        id: 1, 
+        title: "Prepare syllabus for CS-305", 
+        due: "2025-04-20", 
+        status: "pending",
+        description: "Create syllabus for Advanced Algorithms course including topics and grading scheme.",
+        collaborators: [
+          { name: "Dr. Smith", photo: "https://randomuser.me/api/portraits/men/32.jpg" },
+          { name: "Prof. Johnson", photo: "https://randomuser.me/api/portraits/women/44.jpg" }
+        ]
+      },
+      { 
+        id: 2, 
+        title: "Grade midterm exams", 
+        due: "2025-04-15", 
+        status: "completed",
+        description: "Grade all midterm papers and submit marks to department",
+        collaborators: [
+          { name: "Prof. Brown", photo: "https://randomuser.me/api/portraits/women/65.jpg" }
+        ]
+      },
+      { 
+        id: 3, 
+        title: "Research paper submission", 
+        due: "2025-04-30", 
+        status: "pending",
+        description: "Finalize and submit research paper to IEEE journal",
+        collaborators: [
+          { name: "Prof. Miller", photo: "https://randomuser.me/api/portraits/women/33.jpg" },
+          { name: "Dr. Wilson", photo: "https://randomuser.me/api/portraits/men/55.jpg" },
+          { name: "Prof. Moore", photo: "https://randomuser.me/api/portraits/women/22.jpg" }
+        ]
+      }
+    ];
+
+    const taskChats = {
+      1: [
+        { sender: "HOD", message: "Please include new ML topics in syllabus", time: "10:30 AM" },
+        { sender: "You", message: "Will add neural networks and deep learning sections", time: "11:45 AM" }
+      ],
+      2: [
+        { sender: "Exam Dept", message: "Reminder: Grades due by Friday", time: "Apr 12" },
+        { sender: "You", message: "Submitted all grades this morning", time: "Apr 14" }
+      ],
+      3: []
+    };
+
+    let currentActiveTask = null;
+
+    // Initialize the dashboard
+    function initDashboard() {
+      renderTasks();
+      
+      // Load dark mode preference
+      if (localStorage.getItem('darkMode') === 'enabled') {
+        document.body.classList.add('dark-mode');
+      }
+      
+      // Add enter key listener for chat
+      document.getElementById('chatInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          sendMessage();
+        }
+      });
+    }
+
+    // Render all tasks
+    function renderTasks() {
+      const taskList = document.getElementById('taskList');
+      taskList.innerHTML = '';
+      
+      facultyTasks.forEach(task => {
+        const taskCard = document.createElement('div');
+        taskCard.className = `task-card ${task.status === 'completed' ? 'completed' : ''}`;
+        
+        // Create collaborators display
+        let collaboratorsHTML = '';
+        if (task.collaborators && task.collaborators.length > 0) {
+          const maxVisible = 3;
+          const totalCollaborators = task.collaborators.length;
+          const visibleCollaborators = task.collaborators.slice(0, maxVisible);
+          const extraCount = totalCollaborators - maxVisible;
+
+          collaboratorsHTML = `
+            <div class="collaborators-container">
+              <span class="collaborators-label">Collaborators <span class="dash">:</span></span>
+              <div class="collaborators">
+          `;
+
+          visibleCollaborators.forEach((collab, index) => {
+            const zIndex = maxVisible - index;
+            collaboratorsHTML += `
+              <img src="${collab.photo}" alt="${collab.name}" 
+                   class="collaborator-img" 
+                   style="z-index: ${zIndex};" 
+                   title="${collab.name}">
+            `;
+          });
+
+          if (extraCount > 0) {
+            collaboratorsHTML += `
+              <div class="collaborators-count" 
+                   style="z-index: 1;" 
+                   title="${extraCount} more collaborators">+${extraCount}</div>
+            `;
+          }
+
+          collaboratorsHTML += `
+              </div>
+            </div>
+          `;
+        }
+        
+        taskCard.innerHTML = `
+          <div class="task-title">${task.title}</div>
+          ${collaboratorsHTML}
+          <div class="task-meta">
+            <span>Due: ${formatDate(task.due)}</span>
+            <span class="status-badge status-${task.status}">
+              ${task.status === 'completed' ? 'Completed' : 'Pending'}
+            </span>
+          </div>
+          <p style="font-size: 0.9rem; color: #666; margin-bottom: 15px;">${task.description}</p>
+          <div class="task-actions">
+            <button class="btn ${task.status === 'completed' ? 'btn-secondary' : 'btn-primary'}" 
+              onclick="${task.status === 'completed' ? `undoCompletion(${task.id})` : `markCompleted(${task.id})`}">
+              ${task.status === 'completed' ? 'Undo' : 'Complete'}
+            </button>
+            <button class="btn btn-ghost" onclick="openChat(${task.id})">
+              <span style="margin-right: 5px;">💬</span> Discuss
+            </button>
+          </div>
+        `;
+        
+        taskList.appendChild(taskCard);
+      });
+    }
+
+    // Format date for display
+    function formatDate(dateString) {
+      const options = { year: 'numeric', month: 'short', day: 'numeric' };
+      return new Date(dateString).toLocaleDateString('en-US', options);
+    }
+
+    // Open chat for a specific task
+    function openChat(taskId) {
+      currentActiveTask = taskId;
+      const task = facultyTasks.find(t => t.id === taskId);
+      
+      // Update chat title
+      document.getElementById('chatTitle').textContent = task.title;
+      
+      // Show chat sidebar
+      document.getElementById('chatSidebar').classList.add('active');
+      
+      // Render messages
+      renderChatMessages();
+    }
+
+    // Close chat
+    function closeChat() {
+      document.getElementById('chatSidebar').classList.remove('active');
+      currentActiveTask = null;
+    }
+
+    // Render chat messages
+    function renderChatMessages() {
+      const messagesContainer = document.getElementById('chatMessages');
+      messagesContainer.innerHTML = '';
+      
+      if (!currentActiveTask || !taskChats[currentActiveTask] || taskChats[currentActiveTask].length === 0) {
+        messagesContainer.innerHTML = `
+          <div style="text-align: center; padding: 40px; color: #666;">
+            No messages yet. Start the conversation!
+          </div>
+        `;
+        return;
+      }
+      
+      taskChats[currentActiveTask].forEach(msg => {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message message-${msg.sender === 'You' ? 'you' : 'other'}`;
+        
+        if (msg.sender !== 'You') {
+          messageDiv.innerHTML += `<div class="message-sender">${msg.sender}</div>`;
+        }
+        
+        messageDiv.innerHTML += `
+          <div>${msg.message}</div>
+          <div class="message-time">${msg.time}</div>
+        `;
+        
+        messagesContainer.appendChild(messageDiv);
+      });
+      
+      // Scroll to bottom
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    // Send a new message
+    function sendMessage() {
+      if (!currentActiveTask) return;
+      
+      const input = document.getElementById('chatInput');
+      const messageText = input.value.trim();
+      
+      if (!messageText) return;
+      
+      // Create new message
+      const now = new Date();
+      const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      
+      const newMessage = {
+        sender: 'You',
+        message: messageText,
+        time: timeString
+      };
+      
+      // Add to chat history
+      if (!taskChats[currentActiveTask]) {
+        taskChats[currentActiveTask] = [];
+      }
+      
+      taskChats[currentActiveTask].push(newMessage);
+      renderChatMessages();
+      
+      // Clear input
+      input.value = '';
+      
+      // Simulate reply after 1 second
+      setTimeout(() => {
+        if (Math.random() > 0.3) { // 70% chance of reply
+          const replies = [
+            "Thanks for the update!",
+            "Noted, will review this.",
+            "Please proceed with this approach.",
+            "I'll check and get back to you.",
+            "Can you provide more details?"
+          ];
+          
+          const replyMessage = {
+            sender: currentActiveTask === 1 ? 'HOD' : 
+                   currentActiveTask === 2 ? 'Exam Dept' : 'Research Committee',
+            message: replies[Math.floor(Math.random() * replies.length)],
+            time: 'Just now'
+          };
+          
+          taskChats[currentActiveTask].push(replyMessage);
+          renderChatMessages();
+        }
+      }, 1000);
+    }
+
+    // Mark task as completed
+    function markCompleted(taskId) {
+      const task = facultyTasks.find(t => t.id === taskId);
+      if (task) {
+        task.status = 'completed';
+        renderTasks();
+      }
+    }
+
+    // Undo task completion
+    function undoCompletion(taskId) {
+      const task = facultyTasks.find(t => t.id === taskId);
+      if (task) {
+        task.status = 'pending';
+        renderTasks();
+      }
+    }
+
+    // Toggle dark mode
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark-mode');
+      localStorage.setItem('darkMode', document.body.classList.contains('dark-mode') ? 'enabled' : 'disabled');
+    }
+
+    // Initialize the dashboard when page loads
+    window.onload = initDashboard;
+  </script>
+</body>
+</html>
